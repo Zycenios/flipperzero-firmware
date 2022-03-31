@@ -11,7 +11,7 @@ Frame rate: 2
 Duration: 3600
 Active cooldown: 7
 
-Bubble slots: 1
+Bubble slots: 4
 
 Slot: 0
 X: 60
@@ -29,4 +29,40 @@ Text: but not today
 AlignH: Left
 AlignV: Bottom
 StartFrame: 11
+EndFrame: 13
+
+Slot: 1
+X: 60
+Y: 23
+Text: I hate cheese.
+AlignH: Left
+AlignV: Bottom
+StartFrame: 7
+EndFrame: 10
+
+Slot: 1
+X: 60
+Y: 23
+Text: ...actually I\nlike cheese.
+AlignH: Left
+AlignV: Bottom
+StartFrame: 11
+EndFrame: 13
+
+Slot: 2
+X: 60
+Y: 23
+Text: Joe Mama\ngottem 3!
+AlignH: Left
+AlignV: Bottom
+StartFrame: 7
+EndFrame: 13
+
+Slot: 3
+X: 60
+Y: 23
+Text: Work makes\nme mad.
+AlignH: Left
+AlignV: Bottom
+StartFrame: 7
 EndFrame: 13

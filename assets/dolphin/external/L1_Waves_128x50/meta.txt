@@ -11,7 +11,7 @@ Frame rate: 2
 Duration: 3600
 Active cooldown: 5
 
-Bubble slots: 3
+Bubble slots: 7
 
 Slot: 0
 X: 1
@@ -47,4 +47,76 @@ Text: swim all day
 AlignH: Right
 AlignV: Bottom
 StartFrame: 6
+EndFrame: 9
+
+Slot: 3
+X: 1
+Y: 25
+Text: Do fish think
+AlignH: Right
+AlignV: Bottom
+StartFrame: 3
+EndFrame: 5
+
+Slot: 3
+X: 10
+Y: 17
+Text: water is\nwet?
+AlignH: Right
+AlignV: Bottom
+StartFrame: 6
+EndFrame: 9
+
+Slot: 4
+X: 1
+Y: 25
+Text: Susfishious
+AlignH: Right
+AlignV: Bottom
+StartFrame: 3
+EndFrame: 9
+
+Slot: 5
+X: 1
+Y: 17
+Text: Flat earth\nneeds
+AlignH: Right
+AlignV: Bottom
+StartFrame: 3
+EndFrame: 5
+
+Slot: 5
+X: 1
+Y: 17
+Text: boundary\nconditions
+AlignH: Right
+AlignV: Bottom
+StartFrame: 6
+EndFrame: 9
+
+Slot: 6
+X: 1
+Y: 25
+Text: They got\nthe boat out.
+AlignH: Right
+AlignV: Bottom
+StartFrame: 3
+EndFrame: 4
+
+Slot: 6
+X: 1
+Y: 25
+Text: [sends photo\nof Cevi\nin pants]
+AlignH: Right
+AlignV: Bottom
+StartFrame: 5
+EndFrame: 7
+
+Slot: 6
+X: 1
+Y: 25
+Text: wait wrong\nimage
+AlignH: Right
+AlignV: Bottom
+StartFrame: 8
 EndFrame: 9

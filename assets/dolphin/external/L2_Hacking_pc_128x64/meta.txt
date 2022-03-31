@@ -11,7 +11,7 @@ Frame rate: 2
 Duration: 3600
 Active cooldown: 7
 
-Bubble slots: 1
+Bubble slots: 2
 
 Slot: 0
 X: 22
@@ -29,4 +29,13 @@ Text: die like\nthe rest.
 AlignH: Right
 AlignV: Center
 StartFrame: 8
+EndFrame: 10
+
+Slot: 1
+X: 22
+Y: 25
+Text: Work makes\nme mad!
+AlignH: Right
+AlignV: Center
+StartFrame: 4
 EndFrame: 10

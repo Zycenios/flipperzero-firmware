@@ -11,7 +11,7 @@ Frame rate: 2
 Duration: 3600
 Active cooldown: 5
 
-Bubble slots: 2
+Bubble slots: 5
 
 Slot: 0
 X: 53
@@ -38,4 +38,41 @@ Text: Just a dream...
 AlignH: Left
 AlignV: Bottom
 StartFrame: 6
+EndFrame: 9
+
+Slot: 2
+X: 53
+Y: 20
+Text: Card for drawing\nout of turn...
+AlignH: Left
+AlignV: Bottom
+StartFrame: 3
+EndFrame: 9
+
+Slot: 3
+X: 53
+Y: 20
+Text: I had a\ngood quote,
+AlignH: Left
+AlignV: Bottom
+StartFrame: 3
+EndFrame: 5
+
+Slot: 3
+X: 53
+Y: 20
+Text: but I\nforgot it...
+AlignH: Left
+AlignV: Bottom
+StartFrame: 6
+EndFrame: 9
+
+
+Slot: 4
+X: 53
+Y: 31
+Text: I'm sleepy...
+AlignH: Left
+AlignV: Bottom
+StartFrame: 3
 EndFrame: 9
