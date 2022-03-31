@@ -39,3 +39,4 @@ dist
 
 # Backup thing
 .bak/
+*.bak
