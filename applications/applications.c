@@ -46,6 +46,7 @@ extern int32_t battery_test_app(void* p);
 // Plugins
 extern int32_t music_player_app(void* p);
 extern int32_t snake_game_app(void* p);
+extern int32_t xander_test_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -217,6 +218,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef APP_SNAKE_GAME
     {.app = snake_game_app, .name = "Snake Game", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
+	{.app = xander_test_app, .name = "Xander Test", .stack_size = 1024, .icon = &A_Plugins_14},
 };
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
