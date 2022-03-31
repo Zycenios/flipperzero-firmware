@@ -51,7 +51,9 @@ bool desktop_main_input(InputEvent* event, void* context) {
     } else if(event->type == InputTypeLong) {
         if(event->key == InputKeyDown) {
             main_view->callback(DesktopMainEventOpenDebug, main_view->context);
-        }
+        } else if (event->key == InputKeyBack) {
+			main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context); // Change the idle animation if you long-press back. - Xander 3/29/2022
+		}
     }
 
     return true;
