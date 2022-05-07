@@ -5,7 +5,6 @@ void InfraredAppSceneEditRenameDone::on_enter(InfraredApp* app) {
     Popup* popup = view_manager->get_popup();
 
     popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-
     popup_set_header(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
 
     popup_set_callback(popup, InfraredApp::popup_callback);
@@ -27,5 +26,5 @@ bool InfraredAppSceneEditRenameDone::on_event(InfraredApp* app, InfraredAppEvent
     return consumed;
 }
 
-void InfraredAppSceneEditRenameDone::on_exit(InfraredApp* app) {
+void InfraredAppSceneEditRenameDone::on_exit(InfraredApp*) {
 }

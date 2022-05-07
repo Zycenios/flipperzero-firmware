@@ -2,6 +2,7 @@
 
 #include "furi_hal.h"
 #include "../blocks/math.h"
+
 /*
  * Help
  * https://phreakerclub.com/447
@@ -75,8 +76,9 @@ void subghz_encoder_princeton_for_testing_set(
 
     instance->count_key = instance->count_key_package + 3;
 
-    if((millis() - instance->time_stop) < instance->timeout) {
-        instance->time_stop = (instance->timeout - (millis() - instance->time_stop)) * 1000;
+    if((furi_hal_get_tick() - instance->time_stop) < instance->timeout) {
+        instance->time_stop =
+            (instance->timeout - (furi_hal_get_tick() - instance->time_stop)) * 1000;
     } else {
         instance->time_stop = 0;
     }
@@ -247,7 +249,7 @@ void subghz_decoder_princeton_for_testing_parse(
         break;
     case PrincetonDecoderStepCheckDuration:
         if(!level) {
-            if(duration >= (instance->te_short * 10 + instance->te_delta)) {
+            if(duration >= ((uint32_t)instance->te_short * 10 + instance->te_delta)) {
                 instance->parser_step = PrincetonDecoderStepSaveDuration;
                 if(instance->code_count_bit == instance->code_min_count_bit_for_found) {
                     instance->te /= (instance->code_count_bit * 4 + 1);

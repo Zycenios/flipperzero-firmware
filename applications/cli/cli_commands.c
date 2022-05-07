@@ -6,11 +6,14 @@
 #include <time.h>
 #include <notification/notification_messages.h>
 #include <loader/loader.h>
+#include <stream_buffer.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
 
 void cli_command_device_info_callback(const char* key, const char* value, bool last, void* context) {
+    UNUSED(context);
+    UNUSED(last);
     printf("%-24s: %s\r\n", key, value);
 }
 
@@ -19,11 +22,14 @@ void cli_command_device_info_callback(const char* key, const char* value, bool l
  * This command is intended to be used by humans
  */
 void cli_command_device_info(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(args);
     furi_hal_info_get(cli_command_device_info_callback, context);
 }
 
 void cli_command_help(Cli* cli, string_t args, void* context) {
-    (void)args;
+    UNUSED(args);
+    UNUSED(context);
     printf("Commands we have:");
 
     // Command count
@@ -61,6 +67,9 @@ void cli_command_help(Cli* cli, string_t args, void* context) {
 }
 
 void cli_command_date(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+
     FuriHalRtcDateTime datetime = {0};
 
     if(string_size(args) > 0) {
@@ -126,14 +135,35 @@ void cli_command_date(Cli* cli, string_t args, void* context) {
     }
 }
 
+#define CLI_COMMAND_LOG_RING_SIZE 2048
+#define CLI_COMMAND_LOG_BUFFER_SIZE 64
+
+void cli_command_log_tx_callback(const uint8_t* buffer, size_t size, void* context) {
+    xStreamBufferSend(context, buffer, size, 0);
+}
+
 void cli_command_log(Cli* cli, string_t args, void* context) {
-    furi_stdglue_set_global_stdout_callback(cli_stdout_callback);
-    printf("Press any key to stop...\r\n");
-    cli_getc(cli);
-    furi_stdglue_set_global_stdout_callback(NULL);
+    UNUSED(args);
+    UNUSED(context);
+    StreamBufferHandle_t ring = xStreamBufferCreate(CLI_COMMAND_LOG_RING_SIZE, 1);
+    uint8_t buffer[CLI_COMMAND_LOG_BUFFER_SIZE];
+
+    furi_hal_console_set_tx_callback(cli_command_log_tx_callback, ring);
+
+    printf("Press CTRL+C to stop...\r\n");
+    while(!cli_cmd_interrupt_received(cli)) {
+        size_t ret = xStreamBufferReceive(ring, buffer, CLI_COMMAND_LOG_BUFFER_SIZE, 50);
+        cli_write(cli, buffer, ret);
+    }
+
+    furi_hal_console_set_tx_callback(NULL, NULL);
+
+    vStreamBufferDelete(ring);
 }
 
 void cli_command_vibro(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
     if(!string_cmp(args, "0")) {
         NotificationApp* notification = furi_record_open("notification");
         notification_message_block(notification, &sequence_reset_vibro);
@@ -148,6 +178,8 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
 }
 
 void cli_command_debug(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
     if(!string_cmp(args, "0")) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
         loader_update_menu();
@@ -162,6 +194,8 @@ void cli_command_debug(Cli* cli, string_t args, void* context) {
 }
 
 void cli_command_led(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
     // Get first word as light name
     NotificationMessage notification_led_message;
     string_t light_name;
@@ -184,7 +218,7 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     } else if(!string_cmp(light_name, "b")) {
         notification_led_message.type = NotificationMessageTypeLedBlue;
     } else if(!string_cmp(light_name, "bl")) {
-        notification_led_message.type = NotificationMessageTypeLedDisplay;
+        notification_led_message.type = NotificationMessageTypeLedDisplayBacklight;
     } else {
         cli_print_usage("led", "<r|g|b|bl> <0-255>", string_get_cstr(args));
         string_clear(light_name);
@@ -215,6 +249,7 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
 }
 
 void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     char pin_names[][4] = {
         "PC0",
         "PC1",
@@ -295,6 +330,8 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
                 return;
             }
         }
+#else
+        UNUSED(cli);
 #endif
 
         LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
@@ -307,6 +344,10 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
 }
 
 void cli_command_ps(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(context);
+
     const uint8_t threads_num_max = 32;
     osThreadId_t threads_id[threads_num_max];
     uint8_t thread_num = osThreadEnumerate(threads_id, threads_num_max);
@@ -326,16 +367,29 @@ void cli_command_ps(Cli* cli, string_t args, void* context) {
 }
 
 void cli_command_free(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(context);
+
     printf("Free heap size: %d\r\n", memmgr_get_free_heap());
+    printf("Total heap size: %d\r\n", memmgr_get_total_heap());
     printf("Minimum heap size: %d\r\n", memmgr_get_minimum_free_heap());
     printf("Maximum heap block: %d\r\n", memmgr_heap_get_max_free_block());
 }
 
 void cli_command_free_blocks(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(context);
+
     memmgr_heap_printf_free_blocks();
 }
 
 void cli_command_i2c(Cli* cli, string_t args, void* context) {
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(context);
+
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     printf("Scanning external i2c on PC0(SCL)/PC1(SDA)\r\n"
            "Clock: 100khz, 7bit address\r\n"

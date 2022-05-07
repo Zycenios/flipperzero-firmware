@@ -17,10 +17,10 @@ void nfc_scene_card_menu_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    if(nfc->dev->dev_data.nfc_data.protocol > NfcDeviceProtocolUnknown) {
+    if(nfc->dev->dev_data.protocol > NfcDeviceProtocolUnknown) {
         submenu_add_item(
             submenu,
-            "Run compatible app",
+            "Run Compatible App",
             SubmenuIndexRunApp,
             nfc_scene_card_menu_submenu_callback,
             nfc);
@@ -34,7 +34,7 @@ void nfc_scene_card_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Emulate UID", SubmenuIndexEmulate, nfc_scene_card_menu_submenu_callback, nfc);
     submenu_add_item(
-        submenu, "Name and save UID", SubmenuIndexSave, nfc_scene_card_menu_submenu_callback, nfc);
+        submenu, "Save UID", SubmenuIndexSave, nfc_scene_card_menu_submenu_callback, nfc);
     submenu_set_selected_item(
         nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneCardMenu));
 
@@ -49,13 +49,13 @@ bool nfc_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexRunApp) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneCardMenu, SubmenuIndexRunApp);
-            if(nfc->dev->dev_data.nfc_data.protocol == NfcDeviceProtocolMifareUl) {
+            if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUl);
-            } else if(nfc->dev->dev_data.nfc_data.protocol == NfcDeviceProtocolMifareDesfire) {
+            } else if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareDesfire) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareDesfire);
-            } else if(nfc->dev->dev_data.nfc_data.protocol == NfcDeviceProtocolEMV) {
+            } else if(nfc->dev->dev_data.protocol == NfcDeviceProtocolEMV) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvApp);
-            } else if(nfc->dev->dev_data.nfc_data.protocol == NfcDeviceProtocolMifareClassic) {
+            } else if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareClassic) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareClassic);
             }
             consumed = true;

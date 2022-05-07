@@ -41,7 +41,6 @@
 #include <stm32wbxx.h>
 #include <furi_hal_console.h>
 #include <furi/common_defines.h>
-#include <furi_hal_task.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
 all the API functions to use the MPU wrappers.  That should only be done when
@@ -172,7 +171,16 @@ size_t memmgr_heap_get_thread_memory(osThreadId_t thread_id) {
                 !MemmgrHeapAllocDict_end_p(alloc_dict_it);
                 MemmgrHeapAllocDict_next(alloc_dict_it)) {
                 MemmgrHeapAllocDict_itref_t* data = MemmgrHeapAllocDict_ref(alloc_dict_it);
-                leftovers += data->value;
+                if(data->key != 0) {
+                    uint8_t* puc = (uint8_t*)data->key;
+                    puc -= xHeapStructSize;
+                    BlockLink_t* pxLink = (void*)puc;
+
+                    if((pxLink->xBlockSize & xBlockAllocatedBit) != 0 &&
+                       pxLink->pxNextFreeBlock == NULL) {
+                        leftovers += data->value;
+                    }
+                }
             }
         }
         memmgr_heap_thread_trace_depth--;
@@ -197,6 +205,7 @@ static inline void traceMALLOC(void* pointer, size_t size) {
 
 #undef traceFREE
 static inline void traceFREE(void* pointer, size_t size) {
+    UNUSED(size);
     osThreadId_t thread_id = osThreadGetId();
     if(thread_id && memmgr_heap_thread_trace_depth == 0) {
         memmgr_heap_thread_trace_depth++;
@@ -524,6 +533,11 @@ void vPortFree(void* pv) {
         print_heap_free(pv);
 #endif
     }
+}
+/*-----------------------------------------------------------*/
+
+size_t xPortGetTotalHeapSize(void) {
+    return (size_t)&__heap_end__ - (size_t)&__heap_start__;
 }
 /*-----------------------------------------------------------*/
 

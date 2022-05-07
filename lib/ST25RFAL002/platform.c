@@ -1,6 +1,5 @@
 #include "platform.h"
 #include <assert.h>
-#include <main.h>
 #include <furi.h>
 #include <furi_hal_spi.h>
 
@@ -15,6 +14,7 @@ static volatile PlatformIrqCallback platform_irq_callback = NULL;
 static const GpioPin pin = {ST25R_INT_PORT, ST25R_INT_PIN};
 
 void nfc_isr(void* _ctx) {
+    UNUSED(_ctx);
     if(platform_irq_callback && platformGpioIsHigh(ST25R_INT_PORT, ST25R_INT_PIN)) {
         osThreadFlagsSet(platform_irq_thread_id, 0x1);
     }
@@ -30,25 +30,25 @@ void platformIrqThread() {
 }
 
 void platformEnableIrqCallback() {
-    hal_gpio_init(&pin, GpioModeInterruptRise, GpioPullDown, GpioSpeedLow);
-    hal_gpio_enable_int_callback(&pin);
+    furi_hal_gpio_init(&pin, GpioModeInterruptRise, GpioPullDown, GpioSpeedLow);
+    furi_hal_gpio_enable_int_callback(&pin);
 }
 
 void platformDisableIrqCallback() {
-    hal_gpio_init(&pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-    hal_gpio_disable_int_callback(&pin);
+    furi_hal_gpio_init(&pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_disable_int_callback(&pin);
 }
 
 void platformSetIrqCallback(PlatformIrqCallback callback) {
     platform_irq_callback = callback;
     platform_irq_thread_id = osThreadNew(platformIrqThread, NULL, &platform_irq_thread_attr);
-    hal_gpio_add_int_callback(&pin, nfc_isr, NULL);
+    furi_hal_gpio_add_int_callback(&pin, nfc_isr, NULL);
     // Disable interrupt callback as the pin is shared between 2 apps
     // It is enabled in rfalLowPowerModeStop()
-    hal_gpio_disable_int_callback(&pin);
+    furi_hal_gpio_disable_int_callback(&pin);
 }
 
-HAL_StatusTypeDef platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len) {
+bool platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t len) {
     bool ret = false;
     if(txBuf && rxBuf) {
         ret =
@@ -59,11 +59,7 @@ HAL_StatusTypeDef platformSpiTxRx(const uint8_t* txBuf, uint8_t* rxBuf, uint16_t
         ret = furi_hal_spi_bus_rx(&furi_hal_spi_bus_handle_nfc, (uint8_t*)rxBuf, len, 1000);
     }
 
-    if(!ret) {
-        return HAL_ERROR;
-    } else {
-        return HAL_OK;
-    }
+    return ret;
 }
 
 void platformProtectST25RComm() {

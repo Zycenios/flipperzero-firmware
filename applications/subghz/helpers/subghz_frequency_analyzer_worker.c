@@ -29,6 +29,7 @@ struct SubGhzFrequencyAnalyzerWorker {
     volatile bool worker_running;
     uint8_t count_repet;
     FrequencyRSSI frequency_rssi_buf;
+    SubGhzSetting* setting;
 
     float filVal;
 
@@ -43,7 +44,7 @@ static uint32_t subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
     float k;
     float newValFloat = newVal;
     // the sharpness of the filter depends on the absolute value of the difference
-    if(abs(newValFloat - instance->filVal) > 500000)
+    if(fabs(newValFloat - instance->filVal) > 500000)
         k = 0.9;
     else
         k = 0.03;
@@ -70,6 +71,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     furi_hal_subghz_set_frequency(433920000);
     furi_hal_subghz_flush_rx();
+    furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
     furi_hal_subghz_rx();
 
     while(instance->worker_running) {
@@ -77,10 +79,12 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         frequency_rssi.rssi = -127.0f;
         furi_hal_subghz_idle();
         furi_hal_subghz_load_registers(subghz_preset_ook_650khz);
-        for(size_t i = 0; i < subghz_frequencies_count; i++) {
-            if(furi_hal_subghz_is_frequency_valid(subghz_frequencies[i])) {
+        for(size_t i = 0; i < subghz_setting_get_frequency_count(instance->setting); i++) {
+            if(furi_hal_subghz_is_frequency_valid(
+                   subghz_setting_get_frequency(instance->setting, i))) {
                 furi_hal_subghz_idle();
-                frequency = furi_hal_subghz_set_frequency(subghz_frequencies[i]);
+                frequency = furi_hal_subghz_set_frequency(
+                    subghz_setting_get_frequency(instance->setting, i));
                 furi_hal_subghz_rx();
                 osDelay(3);
                 rssi = furi_hal_subghz_get_rssi();
@@ -150,6 +154,8 @@ SubGhzFrequencyAnalyzerWorker* subghz_frequency_analyzer_worker_alloc() {
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_frequency_analyzer_worker_thread);
 
+    instance->setting = subghz_setting_alloc();
+    subghz_setting_load(instance->setting, "/ext/subghz/assets/setting_frequency_analyzer_user");
     return instance;
 }
 
@@ -157,7 +163,7 @@ void subghz_frequency_analyzer_worker_free(SubGhzFrequencyAnalyzerWorker* instan
     furi_assert(instance);
 
     furi_thread_free(instance->thread);
-
+    subghz_setting_free(instance->setting);
     free(instance);
 }
 

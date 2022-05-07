@@ -19,13 +19,15 @@ typedef enum {
     SubGhzCustomEventSceneShowErrorOk,
     SubGhzCustomEventSceneShowErrorSub,
     SubGhzCustomEventSceneShowOnlyRX,
+    SubGhzCustomEventSceneAnalyzerLock,
+    SubGhzCustomEventSceneAnalyzerUnlock,
 
     SubGhzCustomEventSceneExit,
     SubGhzCustomEventSceneStay,
 
-    SubGhzCustomEventViewReceverOK,
-    SubGhzCustomEventViewReceverConfig,
-    SubGhzCustomEventViewReceverBack,
+    SubGhzCustomEventViewReceiverOK,
+    SubGhzCustomEventViewReceiverConfig,
+    SubGhzCustomEventViewReceiverBack,
 
     SubGhzCustomEventViewReadRAWBack,
     SubGhzCustomEventViewReadRAWIDLE,
@@ -35,7 +37,6 @@ typedef enum {
     SubGhzCustomEventViewReadRAWSendStart,
     SubGhzCustomEventViewReadRAWSendStop,
     SubGhzCustomEventViewReadRAWSave,
-    SubGhzCustomEventViewReadRAWVibro,
     SubGhzCustomEventViewReadRAWTXRXStop,
     SubGhzCustomEventViewReadRAWMore,
 

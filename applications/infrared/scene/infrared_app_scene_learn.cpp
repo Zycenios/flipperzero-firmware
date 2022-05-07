@@ -37,6 +37,7 @@ void InfraredAppSceneLearn::on_enter(InfraredApp* app) {
     infrared_worker_rx_start(worker);
 
     popup_set_icon(popup, 0, 32, &I_InfraredLearnShort_128x31);
+    popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignCenter);
     popup_set_text(
         popup, "Point the remote at IR port\nand push the button", 5, 10, AlignLeft, AlignCenter);
     popup_set_callback(popup, NULL);
@@ -50,7 +51,7 @@ bool InfraredAppSceneLearn::on_event(InfraredApp* app, InfraredAppEvent* event) 
     switch(event->type) {
     case InfraredAppEvent::Type::Tick:
         consumed = true;
-        app->notify_red_blink();
+        app->notify_blink_read();
         break;
     case InfraredAppEvent::Type::InfraredMessageReceived:
         app->notify_success();

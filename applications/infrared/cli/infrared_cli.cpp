@@ -60,13 +60,15 @@ static void signal_received_callback(void* context, InfraredWorkerSignal* receiv
 }
 
 static void infrared_cli_start_ir_rx(Cli* cli, string_t args) {
+    UNUSED(cli);
+    UNUSED(args);
     InfraredWorker* worker = infrared_worker_alloc();
     infrared_worker_rx_start(worker);
     infrared_worker_rx_set_received_signal_callback(worker, signal_received_callback, cli);
 
     printf("Receiving INFRARED...\r\nPress Ctrl+C to abort\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
-        delay(50);
+        furi_hal_delay_ms(50);
     }
 
     infrared_worker_rx_stop(worker);
@@ -140,6 +142,7 @@ static bool parse_signal_raw(
 }
 
 static void infrared_cli_start_ir_tx(Cli* cli, string_t args) {
+    UNUSED(cli);
     InfraredMessage message;
     const char* str = string_get_cstr(args);
     uint32_t frequency;
@@ -160,6 +163,7 @@ static void infrared_cli_start_ir_tx(Cli* cli, string_t args) {
 }
 
 static void infrared_cli_start_ir(Cli* cli, string_t args, void* context) {
+    UNUSED(context);
     if(furi_hal_infrared_is_busy()) {
         printf("INFRARED is busy. Exit.");
         return;
@@ -192,5 +196,7 @@ extern "C" void infrared_on_system_start() {
     Cli* cli = (Cli*)furi_record_open("cli");
     cli_add_command(cli, "ir", CliCommandFlagDefault, infrared_cli_start_ir, NULL);
     furi_record_close("cli");
+#else
+    UNUSED(infrared_cli_start_ir);
 #endif
 }

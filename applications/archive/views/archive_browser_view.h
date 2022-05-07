@@ -13,9 +13,8 @@
 #define MAX_NAME_LEN 255
 #define MAX_EXT_LEN 6
 #define FRAME_HEIGHT 12
-#define MENU_ITEMS 4
-#define MAX_DEPTH 32
-#define MOVE_OFFSET 5
+#define MENU_ITEMS 4u
+#define MOVE_OFFSET 5u
 
 typedef enum {
     ArchiveTabFavorites,
@@ -37,12 +36,20 @@ typedef enum {
     ArchiveBrowserEventFileMenuPin,
     ArchiveBrowserEventFileMenuAction,
     ArchiveBrowserEventFileMenuDelete,
+
     ArchiveBrowserEventEnterDir,
+
     ArchiveBrowserEventFavMoveUp,
     ArchiveBrowserEventFavMoveDown,
     ArchiveBrowserEventEnterFavMove,
     ArchiveBrowserEventExitFavMove,
     ArchiveBrowserEventSaveFavMove,
+
+    ArchiveBrowserEventLoadPrevItems,
+    ArchiveBrowserEventLoadNextItems,
+
+    ArchiveBrowserEventLoaderAppExit,
+
     ArchiveBrowserEventExit,
 } ArchiveBrowserEvent;
 
@@ -67,25 +74,26 @@ struct ArchiveBrowserView {
     View* view;
     ArchiveBrowserViewCallback callback;
     void* context;
-
     string_t path;
 };
+
+ARRAY_DEF(idx_last_array, int32_t)
 
 typedef struct {
     ArchiveTabEnum tab_idx;
     ArchiveTabEnum last_tab;
     files_array_t files;
+    idx_last_array_t idx_last;
 
     uint8_t menu_idx;
     bool move_fav;
     bool menu;
+    bool list_loading;
 
-    uint16_t idx;
-    uint16_t last_idx;
-    uint16_t list_offset;
-    uint16_t last_offset;
-    uint8_t depth;
-
+    uint32_t item_cnt;
+    int32_t item_idx;
+    int32_t array_offset;
+    int32_t list_offset;
 } ArchiveBrowserViewModel;
 
 void archive_browser_set_callback(

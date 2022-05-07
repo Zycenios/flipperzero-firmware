@@ -40,3 +40,6 @@ dist
 # Backup thing
 .bak/
 *.bak
+
+# kde
+.directory

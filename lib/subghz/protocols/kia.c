@@ -70,6 +70,7 @@ const SubGhzProtocol subghz_protocol_kia = {
 };
 
 void* subghz_protocol_decoder_kia_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolDecoderKIA* instance = malloc(sizeof(SubGhzProtocolDecoderKIA));
     instance->base.protocol = &subghz_protocol_kia;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -95,15 +96,15 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
 
     switch(instance->decoder.parser_step) {
     case KIADecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
-                        subghz_protocol_kia_const.te_delta)) {
+        if((level) && (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
+                       subghz_protocol_kia_const.te_delta)) {
             instance->decoder.parser_step = KIADecoderStepCheckPreambula;
             instance->decoder.te_last = duration;
             instance->header_count = 0;
         }
         break;
     case KIADecoderStepCheckPreambula:
-        if(!level) {
+        if(level) {
             if((DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <
                 subghz_protocol_kia_const.te_delta) ||
                (DURATION_DIFF(duration, subghz_protocol_kia_const.te_long) <
@@ -139,9 +140,9 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
         }
         break;
     case KIADecoderStepSaveDuration:
-        if(!level) {
+        if(level) {
             if(duration >=
-               (subghz_protocol_kia_const.te_long + subghz_protocol_kia_const.te_delta * 2)) {
+               (uint32_t)(subghz_protocol_kia_const.te_long + subghz_protocol_kia_const.te_delta * 2)) {
                 //Found stop bit
                 instance->decoder.parser_step = KIADecoderStepReset;
                 if(instance->decoder.decode_count_bit >=
@@ -164,7 +165,7 @@ void subghz_protocol_decoder_kia_feed(void* context, bool level, uint32_t durati
         }
         break;
     case KIADecoderStepCheckDuration:
-        if(level) {
+        if(!level) {
             if((DURATION_DIFF(instance->decoder.te_last, subghz_protocol_kia_const.te_short) <
                 subghz_protocol_kia_const.te_delta) &&
                (DURATION_DIFF(duration, subghz_protocol_kia_const.te_short) <

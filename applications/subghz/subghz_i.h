@@ -30,25 +30,20 @@
 #include <lib/subghz/transmitter.h>
 
 #include "subghz_history.h"
+#include "subghz_setting.h"
 
 #include <gui/modules/variable_item_list.h>
+#include <lib/toolbox/path.h>
 
-#define SUBGHZ_TEXT_STORE_SIZE 40
-
-extern const char* const subghz_frequencies_text[];
-extern const uint32_t subghz_frequencies[];
-extern const uint32_t subghz_hopper_frequencies[];
-extern const uint32_t subghz_frequencies_count;
-extern const uint32_t subghz_hopper_frequencies_count;
-extern const uint32_t subghz_frequencies_433_92;
-extern const uint32_t subghz_frequencies_315_00;
+#define SUBGHZ_MAX_LEN_NAME 250
 
 /** SubGhzNotification state */
 typedef enum {
     SubGhzNotificationStateStarting,
     SubGhzNotificationStateIDLE,
-    SubGhzNotificationStateTX,
-    SubGhzNotificationStateRX,
+    SubGhzNotificationStateTx,
+    SubGhzNotificationStateRx,
+    SubGhzNotificationStateRxDone,
 } SubGhzNotificationState;
 
 /** SubGhzTxRx state */
@@ -73,11 +68,20 @@ typedef enum {
     SubGhzRxKeyStateNoSave,
     SubGhzRxKeyStateNeedSave,
     SubGhzRxKeyStateBack,
+    SubGhzRxKeyStateStart,
     SubGhzRxKeyStateAddKey,
     SubGhzRxKeyStateExit,
     SubGhzRxKeyStateRAWLoad,
     SubGhzRxKeyStateRAWSave,
 } SubGhzRxKeyState;
+
+/** SubGhzLoadKeyState state */
+typedef enum {
+    SubGhzLoadKeyStateUnknown,
+    SubGhzLoadKeyStateOK,
+    SubGhzLoadKeyStateParseErr,
+    SubGhzLoadKeyStateOnlyRx,
+} SubGhzLoadKeyState;
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
@@ -115,8 +119,10 @@ struct SubGhz {
     TextInput* text_input;
     Widget* widget;
     DialogsApp* dialogs;
-    char file_name[SUBGHZ_TEXT_STORE_SIZE + 1];
-    char file_name_tmp[SUBGHZ_TEXT_STORE_SIZE + 1];
+    char file_path[SUBGHZ_MAX_LEN_NAME + 1];
+    char file_path_tmp[SUBGHZ_MAX_LEN_NAME + 1];
+    //ToDo you can get rid of it, you need to refactor text input to return the path to the folder
+    char file_dir[SUBGHZ_MAX_LEN_NAME + 1];
     SubGhzNotificationState state_notifications;
 
     SubGhzViewReceiver* subghz_receiver;
@@ -129,6 +135,7 @@ struct SubGhz {
     SubGhzTestCarrier* subghz_test_carrier;
     SubGhzTestPacket* subghz_test_packet;
     string_t error_str;
+    SubGhzSetting* setting;
 };
 
 typedef enum {
@@ -155,12 +162,13 @@ void subghz_rx_end(SubGhz* subghz);
 void subghz_sleep(SubGhz* subghz);
 bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 void subghz_tx_stop(SubGhz* subghz);
+void subghz_dialog_message_show_only_rx(SubGhz* subghz);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
-bool subghz_get_next_name_file(SubGhz* subghz);
+bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len);
 bool subghz_save_protocol_to_file(
     SubGhz* subghz,
     FlipperFormat* flipper_format,
-    const char* dev_name);
+    const char* dev_file_name);
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 bool subghz_rename_file(SubGhz* subghz);
 bool subghz_delete_file(SubGhz* subghz);
