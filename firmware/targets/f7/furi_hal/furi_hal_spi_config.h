@@ -47,6 +47,16 @@ extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_nfc;
  */
 extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_external;
 
+/** Another external SPI for the DAC in the analog module
+ * Preset: `furi_hal_spi_preset_1edge_low_2m`
+ * 
+ * miso: pa6
+ * mosi: pa7
+ * sck: pb3
+ * cs:  pb2 (software controlled)
+*/
+extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_DAC;
+
 /** ST7567(Display) on `furi_hal_spi_bus_d` */
 extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_display;
 

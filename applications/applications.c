@@ -48,6 +48,8 @@ extern int32_t music_player_app(void* p);
 extern int32_t snake_game_app(void* p);
 extern int32_t xander_test_app(void* p);
 extern int32_t oscilloscope_app(void* p);
+extern int32_t multimeter_app(void* p);
+extern int32_t function_generator_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -221,6 +223,8 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #endif
 	{.app = xander_test_app, .name = "Xander Test", .stack_size = 1024, .icon = &A_Plugins_14},
 	{.app = oscilloscope_app, .name = "Oscilloscope", .stack_size = 1024, .icon = &A_Plugins_14},
+	{.app = multimeter_app, .name = "Multimeter", .stack_size = 1024, .icon = &A_Plugins_14},
+	{.app = function_generator_app, .name = "Function Generator", .stack_size = 1024, .icon = &A_Plugins_14},
 };
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);

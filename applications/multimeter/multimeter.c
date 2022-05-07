@@ -6,10 +6,9 @@
 #include <input/input.h>
 
 #include <stdio.h>
+#include <math.h>
 
 typedef struct {
-	uint8_t xpos;
-	uint8_t ypos;
 	char message[16];
 } State;
 
@@ -18,9 +17,12 @@ static void render_callback(Canvas* canvas, void* ctx) {
 	
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontPrimary);
 	
-	canvas_draw_str(canvas, 0 + state->xpos, 12 + state->ypos, state->message);
+	canvas_set_font(canvas, FontPrimary);
+	canvas_draw_str(canvas, 40, 10, "Voltage:");
+	
+    canvas_set_font(canvas, FontBigNumbers);
+	canvas_draw_str(canvas, 36, 30, state->message);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
@@ -43,12 +45,20 @@ static uint16_t sampleADC(uint8_t* tx_buffer, uint8_t* rx_buffer)
 	return out; // Should be from 0 to 4097
 }
 
-int32_t oscilloscope_app(void* p) {
+int32_t multimeter_app(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
 	State state;
-	state.xpos = 0;
-	state.ypos = 0;
-	sprintf(state.message, "Hi!");
+	sprintf(state.message, "0.000V");
+	
+	// Turn on the 5V pin
+	furi_hal_power_enable_otg();
+	
+	// Multimeter settings
+	int numSamples = 256;
+	float adcResolution = 4097.0f; // Float since we divide by this for RMS
+	float supplyVoltage = 5.0f;
+	int measurementDelay = 250;
+	int lastMeasurementTime = 0;
 	
 	/* Initialize external SPI
 	* Preset: `furi_hal_spi_preset_1edge_low_2m`
@@ -78,38 +88,36 @@ int32_t oscilloscope_app(void* p) {
 		
         if(event_status == osOK) {
             // handle events
-			if(event.key == InputKeyUp) {
-                if(state.ypos > 0) state.ypos--;
-            }
-			
-			if(event.key == InputKeyDown) {
-                if(state.ypos < 63) state.ypos++;
-            }
-			
-			if(event.key == InputKeyLeft) {
-                if(state.xpos > 0) state.xpos--;
-            }
-			
-			if(event.key == InputKeyRight) {
-                if(state.xpos < 127) state.xpos++;
-            }
 			
 			if (event.type == InputTypeShort &&
             event.key == InputKeyBack) {
                 break;
             }
-			
-			if (event.type == InputTypeShort && event.key == InputKeyOk)
-			{
-				uint16_t sample = sampleADC(ADCtx_buffer, ADCrx_buffer);
-				sprintf(state.message, "%d", sample);
-			}
         } else {
             // event timeout
         }
+		
+		if (millis() - lastMeasurementTime > measurementDelay)
+		{
+			// Take a bunch of samples and compute the RMS voltage
+			float squareSum = 0.0f;
+			float sample;
+			for (int i = 0; i < numSamples; i++)
+			{
+				sample = ((float)sampleADC(ADCtx_buffer, ADCrx_buffer)) / adcResolution * supplyVoltage;
+				squareSum += sample*sample;
+			}
+			float rmsVoltage = sqrtf(squareSum/((float)numSamples));
+			sprintf(state.message, "%5.3f V", rmsVoltage);
+			
+			lastMeasurementTime = millis();
+		}
 
         view_port_update(view_port);
     }
+	
+	// Turn off the 5V pin
+	furi_hal_power_disable_otg();
 	
 	// Deinitialize external SPI handle
 	furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_external);
